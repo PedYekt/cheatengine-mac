@@ -1,0 +1,42 @@
+# Build directories
+/build/
+/bin/
+/lib/
+
+# CMake generated files
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/compile_commands.json
+/Makefile
+*.cmake
+
+# Compiled binaries
+*.o
+*.a
+*.dylib
+*.so
+/debug_search
+/test_target
+/cheatengine
+
+# Test output and temporary files
+*_commands.txt
+test_*.txt
+*.log
+*.txt.tmp
+
+# macOS artifacts
+.DS_Store
+*.dSYM/
+
+# IDE and editor files
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+*~
+
+# Code signing and debug files
+*.plist.bak

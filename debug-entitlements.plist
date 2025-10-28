@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Required for task_for_pid access -->
+    <key>com.apple.security.get-task-allow</key>
+    <true/>
+    
+    <!-- Allows debugging of processes -->
+    <key>com.apple.security.cs.debugger</key>
+    <true/>
+    
+    <!-- Disable library validation for development -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    
+    <!-- Allow unsigned executable memory (for some debugging scenarios) -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+</dict>
+</plist>
