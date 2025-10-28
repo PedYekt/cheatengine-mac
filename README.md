@@ -2,7 +2,7 @@
 
 CheatEngine is an educational C++17 tool designed to demonstrate operating system memory management concepts through process introspection on macOS. It uses Mach kernel APIs to safely explore virtual memory, making it an excellent learning resource for understanding how modern operating systems manage memory.
 
-## 🎓 Educational Purpose
+## Educational Purpose
 
 This tool is designed for:
 - **Systems Programming Students** learning about virtual memory management
@@ -10,7 +10,7 @@ This tool is designed for:
 - **Security Researchers** exploring process memory layout and protection mechanisms
 - **Computer Science Educators** demonstrating OS concepts in practice
 
-## ⚠️ Safety and Responsible Usage
+## Safety and Responsible Usage
 
 **IMPORTANT**: CheatEngine is designed for educational purposes and should only be used on processes you own.
 
@@ -26,7 +26,7 @@ This tool is designed for:
 - Do not use for malicious purposes or to gain unauthorized access
 - Follow your organization's security policies and guidelines
 
-## 🔧 Installation and Compilation
+## Installation and Compilation
 
 ### Prerequisites
 
@@ -97,7 +97,7 @@ mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
-## 🔐 macOS Security Requirements
+## macOS Security Requirements
 
 CheatEngine requires specific permissions to function on macOS due to Apple's security model.
 
@@ -153,7 +153,7 @@ codesign -dv --entitlements - ./cheatengine
 # Should show the required entitlements
 ```
 
-## 🚀 Usage Guide
+## Usage Guide
 
 ### Basic Usage
 
@@ -222,7 +222,7 @@ codesign -dv --entitlements - ./cheatengine
    > monitor 0x... # Monitor the counter variable
    ```
 
-## 🧠 Memory Management Concepts Demonstrated
+## Memory Management Concepts Demonstrated
 
 ### Virtual Memory Layout
 
@@ -278,7 +278,7 @@ The tool demonstrates:
 - **Temporal Locality**: Accessing recently used memory
 - **Cache Line Effects**: How CPU caches optimize memory access
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues and Solutions
 
@@ -351,7 +351,7 @@ When reporting problems, include:
 - Error messages and logs
 - Steps to reproduce
 
-## 📚 Educational Resources
+## Educational Resources
 
 ### Recommended Reading
 
@@ -383,7 +383,7 @@ When reporting problems, include:
    - Observe cache effects in real programs
    - Understand memory bandwidth limitations
 
-## 🤝 Contributing
+## Contributing
 
 CheatEngine is an educational project. Contributions that enhance learning are welcome:
 
@@ -400,11 +400,11 @@ CheatEngine is an educational project. Contributions that enhance learning are w
 - Follow C++17 best practices
 - Ensure cross-platform compatibility where possible
 
-## 📄 License
+## License
 
 This project is released under the MIT License. See LICENSE file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Apple Developer Documentation for Mach VM APIs
 - macOS security model documentation
