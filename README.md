@@ -2,29 +2,11 @@
 
 CheatEngine is an educational C++17 tool designed to demonstrate operating system memory management concepts through process introspection on macOS. It uses Mach kernel APIs to safely explore virtual memory, making it an excellent learning resource for understanding how modern operating systems manage memory.
 
-## Educational Purpose
-
-This tool is designed for:
-- **Systems Programming Students** learning about virtual memory management
-- **macOS Developers** understanding Mach kernel APIs and memory operations
-- **Security Researchers** exploring process memory layout and protection mechanisms
-- **Computer Science Educators** demonstrating OS concepts in practice
-
-## Safety and Responsible Usage
-
-**IMPORTANT**: CheatEngine is designed for educational purposes and should only be used on processes you own.
-
 ### Safety Guidelines
 - **Only attach to your own processes** - Never attempt to access processes owned by other users
 - **Respect system boundaries** - Do not attempt to bypass macOS security features
 - **Use for learning** - This tool is meant to understand concepts, not to circumvent application security
 - **Test safely** - Always test on sample applications or your own code first
-
-### Legal and Ethical Considerations
-- Only use on systems and processes you have explicit permission to analyze
-- Respect software licenses and terms of service
-- Do not use for malicious purposes or to gain unauthorized access
-- Follow your organization's security policies and guidelines
 
 ## Installation and Compilation
 
@@ -403,14 +385,3 @@ CheatEngine is an educational project. Contributions that enhance learning are w
 ## License
 
 This project is released under the MIT License. See LICENSE file for details.
-
-## Acknowledgments
-
-- Apple Developer Documentation for Mach VM APIs
-- macOS security model documentation
-- Educational resources from various computer science programs
-- Open source memory analysis tools for inspiration
-
----
-
-**Remember**: Use CheatEngine responsibly and only for educational purposes. Always respect system security boundaries and only analyze processes you own.
