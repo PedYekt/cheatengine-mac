@@ -194,7 +194,7 @@ public:
      * 
      * Demonstrates configuration serialization and error handling for file operations.
      */
-    void saveConfig(const std::string& config_file = "") const;
+    void saveConfig(const std::string& config_file = "");
     
     // Application lifecycle - demonstrate resource management patterns
     

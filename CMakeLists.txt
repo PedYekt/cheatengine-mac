@@ -43,7 +43,8 @@ set(CHEATENGINE_CORE_SOURCES
     src/process/process_manager.cpp
     src/process/security_manager.cpp
     src/monitor/value_monitor.cpp
-    src/writer/memory_writer.cpp)
+    src/writer/memory_writer.cpp
+    src/cli/command_line_interface.cpp)
 
 add_library(cheatengine_core ${CHEATENGINE_CORE_SOURCES})
 

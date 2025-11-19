@@ -6,6 +6,7 @@
 #include "cheatengine/process/process_manager.hpp"
 #include "cheatengine/process/security_manager.hpp"
 #include "cheatengine/core/errors.hpp"
+#include "cheatengine/core/application.hpp"
 
 #include <cmath>
 #include <cstring>
@@ -567,6 +568,38 @@ bool test_value_monitor_concurrent_access()
     return true;
 }
 
+bool test_configuration_persistence()
+{
+    cheatengine::Application app;
+    std::string test_config_file = "test_config.conf";
+    
+    // Set some non-default values
+    app.config().max_search_results = 12345;
+    app.config().show_educational_info = false;
+    app.config().monitor_interval = std::chrono::milliseconds(500);
+    
+    // Save config
+    app.saveConfig(test_config_file);
+    
+    // Reset config to defaults
+    app.loadConfig(""); // Should load defaults
+    EXPECT_EQ(app.config().max_search_results, 1000);
+    EXPECT_TRUE(app.config().show_educational_info);
+    
+    // Load saved config
+    app.loadConfig(test_config_file);
+    
+    // Verify values
+    EXPECT_EQ(app.config().max_search_results, 12345);
+    EXPECT_TRUE(!app.config().show_educational_info);
+    EXPECT_EQ(app.config().monitor_interval.count(), 500);
+    
+    // Cleanup
+    unlink(test_config_file.c_str());
+    
+    return true;
+}
+
 struct TestCase {
     const char* name;
     bool (*function)();
@@ -608,6 +641,9 @@ const TestCase kTests[] = {
     // Memory writer tests
     {"MemoryWriter invalid parameters", &test_memory_writer_invalid_parameters},
     {"MemoryWriter history tracking", &test_memory_writer_history_tracking},
+    
+    // Configuration tests
+    {"Configuration persistence", &test_configuration_persistence},
 };
 
 } // namespace
