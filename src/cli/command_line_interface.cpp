@@ -100,7 +100,7 @@ void printSecurityStatus(const SecurityManager::ProcessAccessInfo& access_info)
     }
 }
 
-void printRegion(const MemoryRegion& region, bool show_educational_info = false)
+void printRegion(const MemoryRegion& region)
 {
     std::ios_base::fmtflags original_flags = std::cout.flags();
     
@@ -123,45 +123,11 @@ void printRegion(const MemoryRegion& region, bool show_educational_info = false)
     std::string flags_str = region.flags().toString();
     std::cout << std::setw(8) << flags_str << "  ";
     
-    // Region type with educational context
+    // Region type label
     std::cout << std::setw(15) << region.category;
     
     if (region.is_shared) {
         std::cout << " (shared)";
-    }
-    
-    if (show_educational_info) {
-        std::cout << "\n    └─ ";
-        
-        // Add educational explanations based on region type
-        if (region.category == "STACK") {
-            std::cout << "Stack: Stores function call frames, local variables, return addresses";
-        } else if (region.category == "HEAP") {
-            std::cout << "Heap: Dynamic memory allocation area (malloc, new)";
-        } else if (region.category == "CODE") {
-            std::cout << "Code: Executable instructions, typically read-only for security";
-        } else if (region.category == "DATA") {
-            std::cout << "Data: Global and static variables, initialized data";
-        } else if (region.category == "LIBRARY") {
-            std::cout << "Library: Shared library code and data (dylib)";
-        } else if (region.category == "GUARD") {
-            std::cout << "Guard: Protection page to detect buffer overflows";
-        } else {
-            std::cout << "Virtual memory region managed by the kernel";
-        }
-        
-        // Add protection explanation
-        if (flags_str.find('r') != std::string::npos && 
-            flags_str.find('w') != std::string::npos && 
-            flags_str.find('x') != std::string::npos) {
-            std::cout << " [RWX: Full access - rare and potentially dangerous]";
-        } else if (flags_str.find('x') != std::string::npos) {
-            std::cout << " [Executable: Contains CPU instructions]";
-        } else if (flags_str.find('w') != std::string::npos) {
-            std::cout << " [Writable: Can be modified]";
-        } else if (flags_str.find('r') != std::string::npos) {
-            std::cout << " [Read-only: Protected from modification]";
-        }
     }
     
     std::cout << '\n';
@@ -177,14 +143,13 @@ CommandLineInterface::CommandLineInterface(Application& app)
 
 void CommandLineInterface::run()
 {
-    std::cout << "=== CheatEngine - Educational Memory Analysis Tool ===\n";
-    std::cout << "A tool for learning macOS memory management and security concepts.\n";
+    std::cout << "=== CheatEngine - Memory Analysis Tool ===\n";
+    std::cout << "A tool for macOS memory analysis and process inspection.\n";
     std::cout << "Type 'help' for commands or 'troubleshoot' for security guidance.\n";
     
     // Show configuration status
     const auto& config = app_.config();
     std::cout << "\nConfiguration:\n";
-    std::cout << "• Educational mode: " << (config.show_educational_info ? "enabled" : "disabled") << "\n";
     std::cout << "• Memory writing: " << (config.enable_memory_writing ? "enabled" : "disabled") << "\n";
     std::cout << "• Max search results: " << config.max_search_results << "\n";
     std::cout << "• Monitor interval: " << config.monitor_interval.count() << "ms\n\n";
@@ -228,9 +193,7 @@ void CommandLineInterface::run()
                 }
                 handleSecurity(pid_str);
             } else if (command == "regions") {
-                handleRegions(false);
-            } else if (command == "regions-edu") {
-                handleRegions(true);
+                handleRegions();
             } else if (command == "search") {
                 std::string type_token;
                 std::string value_token;
@@ -240,7 +203,7 @@ void CommandLineInterface::run()
                     std::cout << "Example: search int32 42\n";
                     continue;
                 }
-                handleSearch(type_token, value_token, false, true); // Fast search by default
+                handleSearch(type_token, value_token, true); // Fast search by default
             } else if (command == "search-all") {
                 std::string type_token;
                 std::string value_token;
@@ -250,17 +213,7 @@ void CommandLineInterface::run()
                     std::cout << "Example: search-all int32 42\n";
                     continue;
                 }
-                handleSearch(type_token, value_token, false, false); // Complete search
-            } else if (command == "search-edu") {
-                std::string type_token;
-                std::string value_token;
-                if (!(iss >> type_token >> value_token)) {
-                    std::cout << "Usage: search-edu <type> <value>\n";
-                    std::cout << "Types: int32, int64, float, double\n";
-                    std::cout << "Example: search-edu int32 42\n";
-                    continue;
-                }
-                handleSearch(type_token, value_token, true, true); // Educational fast search
+                handleSearch(type_token, value_token, false); // Complete search
             } else if (command == "write") {
                 std::string address_str, type_str, value_str;
                 if (!(iss >> address_str >> type_str >> value_str)) {
@@ -285,9 +238,7 @@ void CommandLineInterface::run()
                     }
                     handleMonitorAdd(address_token, size_token);
                 } else if (subcommand == "list") {
-                    handleMonitorList(false);
-                } else if (subcommand == "list-edu") {
-                    handleMonitorList(true);
+                    handleMonitorList();
                 } else if (subcommand == "poll") {
                     handleMonitorPoll();
                 } else if (subcommand == "clear") {
@@ -301,12 +252,6 @@ void CommandLineInterface::run()
                 handleEntitlements();
             } else if (command == "sip-status") {
                 handleSIPStatus();
-            } else if (command == "memory-concepts") {
-                handleMemoryConcepts();
-            } else if (command == "mach-apis") {
-                handleMachAPIs();
-            } else if (command == "security-model") {
-                handleSecurityModel();
             } else if (command == "config") {
                 std::string subcommand;
                 if (!(iss >> subcommand)) {
@@ -330,7 +275,7 @@ void CommandLineInterface::run()
             } else if (command == "quit" || command == "exit") {
                 std::cout << "Shutting down CheatEngine...\n";
                 app_.shutdown();
-                std::cout << "Thank you for learning about memory management!\n";
+                std::cout << "Goodbye.\n";
                 break;
             } else if (command.empty()) {
                 continue;
@@ -349,7 +294,7 @@ void CommandLineInterface::run()
 
 void CommandLineInterface::printHelp() const
 {
-    std::cout << "CheatEngine - Educational Memory Analysis Tool\n\n"
+    std::cout << "CheatEngine - Memory Analysis Tool\n\n"
                  "Process Management:\n"
                  "  attach <pid>                  Attach to a process by PID\n"
                  "  attach self                   Attach to the CheatEngine process\n"
@@ -360,23 +305,15 @@ void CommandLineInterface::printHelp() const
                  "\n"
                  "Memory Analysis:\n"
                  "  regions                       List memory regions of attached process\n"
-                 "  regions-edu                   List regions with educational explanations\n"
                  "  search <type> <value>         Fast search in likely regions (STACK, HEAP, DATA)\n"
                  "  search-all <type> <value>     Search all readable memory regions (slower)\n"
-                 "  search-edu <type> <value>     Search with educational explanations\n"
                  "  write <address> <type> <value> Write value to memory address\n"
                  "\n"
                  "Monitoring:\n"
                  "  monitor add <address> <size>  Add address to monitor (size in bytes)\n"
                  "  monitor list                  Show monitored addresses\n"
-                 "  monitor list-edu              Show monitored addresses with explanations\n"
                  "  monitor poll                  Poll monitored addresses for changes\n"
                  "  monitor clear                 Clear all monitored addresses\n"
-                 "\n"
-                 "Educational Features:\n"
-                 "  memory-concepts               Learn about virtual memory concepts\n"
-                 "  mach-apis                     Learn about Mach kernel APIs\n"
-                 "  security-model                Learn about macOS security model\n"
                  "\n"
                  "Security & Troubleshooting:\n"
                  "  troubleshoot                  Show security troubleshooting guide\n"
@@ -392,9 +329,7 @@ void CommandLineInterface::printHelp() const
                  "  help                          Show this help message\n"
                  "  quit                          Exit the program\n"
                  "\n"
-                 "Educational Note: This tool demonstrates macOS memory management concepts\n"
-                 "using Mach kernel APIs. It only works with processes you own.\n"
-                 "Commands ending with '-edu' provide detailed educational explanations.\n";
+                 "Note: This tool uses Mach kernel APIs and only works with processes you own.\n";
 }
 
 void CommandLineInterface::handleAttach(const std::string& target)
@@ -436,12 +371,6 @@ void CommandLineInterface::handleAttach(const std::string& target)
             std::cout << "Note: Limited access mode - some features may be restricted.\n";
         }
         
-        // Show additional context if educational mode is enabled
-        if (app_.config().show_educational_info) {
-            std::cout << "\nEducational Note:\n";
-            std::cout << "Successfully obtained task port using task_for_pid() system call.\n";
-            std::cout << "This enables memory introspection through Mach VM APIs.\n";
-        }
     } else {
         std::cout << "Failed to attach to PID " << pid << ".\n";
         const auto& error = app_.getLastError();
@@ -602,7 +531,7 @@ void CommandLineInterface::handleSecurity(const std::string& pid_str) const
     printSecurityStatus(access_info);
 }
 
-void CommandLineInterface::handleRegions(bool show_educational) const
+void CommandLineInterface::handleRegions() const
 {
     const auto info = app_.processManager().currentProcess();
     if (!info) {
@@ -616,13 +545,7 @@ void CommandLineInterface::handleRegions(bool show_educational) const
     std::cout << "Process: " << getProcessName(info->pid) << "\n";
     std::cout << "Total regions: " << regions.size() << "\n\n";
     
-    if (show_educational) {
-        std::cout << "Educational Mode: Detailed explanations included\n";
-        std::cout << "Format: [Start - End] Size Protection Type\n\n";
-    } else {
-        std::cout << "Format: [Start - End] Size Protection Type\n";
-        std::cout << "Use 'regions-edu' for educational explanations\n\n";
-    }
+    std::cout << "Format: [Start - End] Size Protection Type\n\n";
     
     // Group regions by type for better understanding
     std::map<std::string, std::vector<MemoryRegion>> regions_by_type;
@@ -637,7 +560,7 @@ void CommandLineInterface::handleRegions(bool show_educational) const
     for (const auto& [type, type_regions] : regions_by_type) {
         std::cout << "--- " << type << " regions (" << type_regions.size() << ") ---\n";
         for (const auto& region : type_regions) {
-            printRegion(region, show_educational);
+            printRegion(region);
         }
         std::cout << "\n";
     }
@@ -655,15 +578,9 @@ void CommandLineInterface::handleRegions(bool show_educational) const
     
     std::cout << "Region types: " << regions_by_type.size() << "\n";
     
-    if (show_educational) {
-        std::cout << "\nEducational Note:\n";
-        std::cout << "This demonstrates how macOS organizes process memory into distinct regions\n";
-        std::cout << "with different purposes and protection levels. The kernel manages these\n";
-        std::cout << "regions through the Mach VM subsystem, providing process isolation and security.\n";
-    }
 }
 
-void CommandLineInterface::handleSearch(const std::string& type_token, const std::string& value_token, bool show_educational, bool fast_search)
+void CommandLineInterface::handleSearch(const std::string& type_token, const std::string& value_token, bool fast_search)
 {
     const auto info = app_.processManager().currentProcess();
     if (!info) {
@@ -682,17 +599,6 @@ void CommandLineInterface::handleSearch(const std::string& type_token, const std
     std::cout << "Target process: " << getProcessName(info->pid) << " (PID " << info->pid << ")\n";
     std::cout << "Search mode: " << (fast_search ? "Fast (STACK, HEAP, DATA only)" : "Complete (all regions)") << "\n";
     
-    if (show_educational) {
-        std::cout << "\nEducational Note:\n";
-        std::cout << "This search uses mach_vm_read_overwrite() to scan readable memory regions.\n";
-        std::cout << "The search is performed in chunks to optimize performance and minimize\n";
-        std::cout << "system call overhead. Only regions with read permissions are scanned.\n";
-        if (fast_search) {
-            std::cout << "Fast search focuses on regions where user data is typically stored.\n";
-        }
-        std::cout << "\n";
-    }
-
     const auto results = fast_search ? 
         app_.memoryScanner().searchFast(info->task_port, *value) :
         app_.memoryScanner().search(info->task_port, *value);
@@ -701,16 +607,6 @@ void CommandLineInterface::handleSearch(const std::string& type_token, const std
         std::cout << "No matches found.\n";
         if (fast_search) {
             std::cout << "Try 'search-all " << type_token << " " << value_token << "' for a complete search.\n";
-        }
-        if (show_educational) {
-            std::cout << "\nPossible reasons:\n";
-            std::cout << "• Value doesn't exist in memory\n";
-            std::cout << "• Value is in a protected/unreadable region\n";
-            std::cout << "• Value has different byte representation (endianness)\n";
-            std::cout << "• Value is stored in a different data type\n";
-            if (fast_search) {
-                std::cout << "• Value is in a region not searched by fast mode (try search-all)\n";
-            }
         }
         return;
     }
@@ -743,9 +639,6 @@ void CommandLineInterface::handleSearch(const std::string& type_token, const std
         std::cout << "      Region: " << region_info << "\n";
         std::cout << "      Context: " << bytesToHex(result.context, kDefaultContextBytes) << "\n";
         
-        if (show_educational) {
-            std::cout << "      └─ This address can be monitored or modified (if writable)\n";
-        }
         std::cout << "\n";
     }
     
@@ -753,18 +646,6 @@ void CommandLineInterface::handleSearch(const std::string& type_token, const std
         std::cout << "  ... " << (results.size() - display_count) << " more results not shown.\n\n";
     }
     
-    if (show_educational) {
-        std::cout << "Next steps:\n";
-        std::cout << "• Use 'monitor add <address> <size>' to track changes\n";
-        std::cout << "• Use 'write <address> <type> <value>' to modify (if writable)\n";
-        std::cout << "• Use 'regions' to see memory layout\n\n";
-        
-        std::cout << "Memory Search Concepts:\n";
-        std::cout << "• Virtual memory is searched in page-aligned chunks\n";
-        std::cout << "• Only readable regions are accessible\n";
-        std::cout << "• Byte order (endianness) affects how values are stored\n";
-        std::cout << "• Different data types have different memory representations\n";
-    }
 }
 
 void CommandLineInterface::handleWrite(const std::string& address_str, const std::string& type_str, const std::string& value_str)
@@ -807,12 +688,7 @@ void CommandLineInterface::handleWrite(const std::string& address_str, const std
     }
     
     // Use the integrated secure write method
-    if (app_.performSecureMemoryWrite(address, data)) {
-        if (app_.config().show_educational_info) {
-            std::cout << "Educational Note: Memory write demonstrates direct process memory modification\n";
-            std::cout << "using mach_vm_write() system call with proper permission validation.\n";
-        }
-    } else {
+    if (!app_.performSecureMemoryWrite(address, data)) {
         std::cout << "Failed to write to address 0x" << std::hex << address << std::dec << "\n";
         const auto& error = app_.getLastError();
         if (!error.empty()) {
@@ -859,26 +735,17 @@ void CommandLineInterface::handleMonitorAdd(const std::string& address_token, co
     }
 }
 
-void CommandLineInterface::handleMonitorList(bool show_educational) const
+void CommandLineInterface::handleMonitorList() const
 {
     const auto list = app_.valueMonitor().tracked();
     if (list.empty()) {
         std::cout << "No addresses being monitored.\n";
-        if (show_educational) {
-            std::cout << "\nEducational Note:\n";
-            std::cout << "Memory monitoring allows real-time observation of value changes.\n";
-            std::cout << "Use 'monitor add <address> <size>' to start monitoring an address.\n";
-        }
         return;
     }
 
     std::cout << "=== Monitored Memory Addresses ===\n";
     std::cout << "Total addresses: " << list.size() << "\n\n";
     
-    if (show_educational) {
-        std::cout << "Educational Mode: Monitoring demonstrates real-time memory observation\n\n";
-    }
-
     // Get current process info for region context
     const auto info = app_.processManager().currentProcess();
     std::vector<MemoryRegion> regions;
@@ -904,22 +771,7 @@ void CommandLineInterface::handleMonitorList(bool show_educational) const
             }
         }
         
-        if (show_educational) {
-            std::cout << "      └─ Periodically read to detect changes using mach_vm_read_overwrite()\n";
-        }
         std::cout << "\n";
-    }
-    
-    if (show_educational) {
-        std::cout << "Memory Monitoring Concepts:\n";
-        std::cout << "• Polling: Periodically reading memory to detect changes\n";
-        std::cout << "• Comparison: Storing previous values to identify modifications\n";
-        std::cout << "• Performance: Balance between update frequency and CPU usage\n";
-        std::cout << "• Use cases: Debugging, reverse engineering, understanding program behavior\n\n";
-        
-        std::cout << "Commands:\n";
-        std::cout << "• 'monitor poll' - Check for changes now\n";
-        std::cout << "• 'monitor clear' - Remove all monitored addresses\n";
     }
 }
 
@@ -971,13 +823,7 @@ void CommandLineInterface::handleTroubleshoot() const
                  "4. Code signing issues:\n"
                  "   - Sign with: codesign --force --sign \"Apple Development\" \\\n"
                  "     --entitlements debug-entitlements.plist cheatengine\n"
-                 "   - Ensure you have a valid Apple Developer certificate\n\n"
-                 "Educational Purpose:\n"
-                 "This tool demonstrates macOS security mechanisms including:\n"
-                 "- Process isolation and ownership validation\n"
-                 "- Code signing and entitlements system\n"
-                 "- System Integrity Protection (SIP)\n"
-                 "- Mach kernel API security model\n\n";
+                 "   - Ensure you have a valid Apple Developer certificate\n\n";
 }
 
 void CommandLineInterface::handleEntitlements() const
@@ -999,127 +845,6 @@ void CommandLineInterface::handleSIPStatus() const
     
     std::cout << "To check full SIP status, run in Terminal:\n";
     std::cout << "  csrutil status\n\n";
-    
-    std::cout << "Educational Note:\n";
-    std::cout << "SIP demonstrates defense-in-depth security principles by:\n";
-    std::cout << "- Protecting critical system processes from modification\n";
-    std::cout << "- Enforcing process isolation boundaries\n";
-    std::cout << "- Requiring explicit permissions for debugging access\n";
-}
-
-void CommandLineInterface::handleMemoryConcepts() const
-{
-    std::cout << "\n=== Virtual Memory Concepts ===\n\n";
-    
-    std::cout << "1. Virtual Address Space:\n";
-    std::cout << "   • Each process has its own virtual address space\n";
-    std::cout << "   • On 64-bit macOS, this is typically 48-bit addressing (256 TB)\n";
-    std::cout << "   • Virtual addresses are translated to physical addresses by the MMU\n";
-    std::cout << "   • Provides process isolation and memory protection\n\n";
-    
-    std::cout << "2. Memory Pages:\n";
-    std::cout << "   • Memory is managed in fixed-size pages (typically 4KB on x86_64)\n";
-    std::cout << "   • Pages can be mapped, unmapped, or have different protection levels\n";
-    std::cout << "   • Page faults occur when accessing unmapped or protected pages\n";
-    std::cout << "   • Demand paging loads pages from disk when needed\n\n";
-    
-    std::cout << "3. Memory Layout (typical macOS process):\n";
-    std::cout << "   High addresses: Stack (grows downward)\n";
-    std::cout << "                   ↓\n";
-    std::cout << "                   Shared libraries (dylibs)\n";
-    std::cout << "                   Heap (grows upward)\n";
-    std::cout << "                   ↑\n";
-    std::cout << "                   Data segment (globals, statics)\n";
-    std::cout << "   Low addresses:  Code segment (executable)\n\n";
-    
-    std::cout << "4. Memory Protection:\n";
-    std::cout << "   • Read (r): Can read memory contents\n";
-    std::cout << "   • Write (w): Can modify memory contents\n";
-    std::cout << "   • Execute (x): Can execute code from memory\n";
-    std::cout << "   • NX bit prevents code execution from data pages\n\n";
-    
-    std::cout << "5. Copy-on-Write (COW):\n";
-    std::cout << "   • Shared pages are marked read-only initially\n";
-    std::cout << "   • Writing triggers a copy to private memory\n";
-    std::cout << "   • Optimizes memory usage for shared libraries\n\n";
-}
-
-void CommandLineInterface::handleMachAPIs() const
-{
-    std::cout << "\n=== Mach Kernel APIs ===\n\n";
-    
-    std::cout << "CheatEngine uses several Mach kernel APIs for memory introspection:\n\n";
-    
-    std::cout << "1. task_for_pid(mach_task_self(), pid, &task):\n";
-    std::cout << "   • Obtains a task port for the target process\n";
-    std::cout << "   • Requires proper entitlements (com.apple.security.get-task-allow)\n";
-    std::cout << "   • Task port is needed for all memory operations\n";
-    std::cout << "   • Returns KERN_SUCCESS on success\n\n";
-    
-    std::cout << "2. mach_vm_region(task, &address, &size, flavor, info, &count, &object):\n";
-    std::cout << "   • Enumerates memory regions in the target process\n";
-    std::cout << "   • Returns region start, size, and protection information\n";
-    std::cout << "   • Used to discover the memory layout\n";
-    std::cout << "   • Iteratively called to scan entire address space\n\n";
-    
-    std::cout << "3. mach_vm_read_overwrite(task, address, size, data, &data_count):\n";
-    std::cout << "   • Reads memory contents from the target process\n";
-    std::cout << "   • More efficient than mach_vm_read for large reads\n";
-    std::cout << "   • Requires read permissions on the target region\n";
-    std::cout << "   • Used for memory scanning and monitoring\n\n";
-    
-    std::cout << "4. mach_vm_write(task, address, data, data_count):\n";
-    std::cout << "   • Writes data to the target process memory\n";
-    std::cout << "   • Requires write permissions on the target region\n";
-    std::cout << "   • Can modify program behavior and data\n";
-    std::cout << "   • Use with caution - can crash the target process\n\n";
-    
-    std::cout << "Error Handling:\n";
-    std::cout << "• All Mach APIs return kern_return_t status codes\n";
-    std::cout << "• KERN_SUCCESS (0) indicates success\n";
-    std::cout << "• Common errors: KERN_INVALID_ADDRESS, KERN_PROTECTION_FAILURE\n";
-    std::cout << "• Always check return values and handle errors appropriately\n\n";
-}
-
-void CommandLineInterface::handleSecurityModel() const
-{
-    std::cout << "\n=== macOS Security Model ===\n\n";
-    
-    std::cout << "1. Process Isolation:\n";
-    std::cout << "   • Each process runs in its own virtual address space\n";
-    std::cout << "   • Hardware MMU enforces memory protection boundaries\n";
-    std::cout << "   • Processes cannot directly access each other's memory\n";
-    std::cout << "   • Inter-process communication requires explicit mechanisms\n\n";
-    
-    std::cout << "2. Code Signing:\n";
-    std::cout << "   • All executables must be signed with a valid certificate\n";
-    std::cout << "   • Signature includes cryptographic hash of code pages\n";
-    std::cout << "   • Kernel verifies signatures before execution\n";
-    std::cout << "   • Prevents execution of modified or malicious code\n\n";
-    
-    std::cout << "3. Entitlements:\n";
-    std::cout << "   • Special permissions embedded in code signatures\n";
-    std::cout << "   • Control access to restricted APIs and resources\n";
-    std::cout << "   • 'get-task-allow' enables debugging/introspection\n";
-    std::cout << "   • 'cs.debugger' allows attaching to other processes\n\n";
-    
-    std::cout << "4. System Integrity Protection (SIP):\n";
-    std::cout << "   • Protects critical system files and processes\n";
-    std::cout << "   • Prevents modification even by root user\n";
-    std::cout << "   • Blocks task_for_pid on system processes\n";
-    std::cout << "   • Can be disabled for development (not recommended)\n\n";
-    
-    std::cout << "5. Sandboxing:\n";
-    std::cout << "   • Restricts process capabilities and file system access\n";
-    std::cout << "   • App Store apps run in strict sandboxes\n";
-    std::cout << "   • Limits network access and hardware interaction\n";
-    std::cout << "   • Provides defense-in-depth security\n\n";
-    
-    std::cout << "6. Address Space Layout Randomization (ASLR):\n";
-    std::cout << "   • Randomizes memory layout on each execution\n";
-    std::cout << "   • Makes exploitation more difficult\n";
-    std::cout << "   • Stack, heap, and library locations vary\n";
-    std::cout << "   • Observe different addresses when restarting processes\n\n";
 }
 
 void CommandLineInterface::handleConfigShow() const
@@ -1137,7 +862,6 @@ void CommandLineInterface::handleConfigShow() const
     std::cout << "  max_monitored_addresses: " << config.max_monitored_addresses << "\n\n";
     
     std::cout << "Display Settings:\n";
-    std::cout << "  show_educational_info: " << (config.show_educational_info ? "true" : "false") << "\n";
     std::cout << "  verbose_errors: " << (config.verbose_errors ? "true" : "false") << "\n";
     std::cout << "  context_bytes: " << config.context_bytes << "\n\n";
     
@@ -1163,8 +887,6 @@ void CommandLineInterface::handleConfigSet(const std::string& key, const std::st
             config.monitor_interval = std::chrono::milliseconds(std::stoul(value));
         } else if (key == "max_monitored_addresses") {
             config.max_monitored_addresses = std::stoul(value);
-        } else if (key == "show_educational_info") {
-            config.show_educational_info = (value == "true" || value == "1" || value == "yes");
         } else if (key == "verbose_errors") {
             config.verbose_errors = (value == "true" || value == "1" || value == "yes");
         } else if (key == "context_bytes") {

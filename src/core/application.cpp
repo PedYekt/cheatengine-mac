@@ -116,8 +116,6 @@ void Application::loadConfig(const std::string& config_file)
                         config_.monitor_interval = std::chrono::milliseconds(std::stoul(value));
                     } else if (key == "max_monitored_addresses") {
                         config_.max_monitored_addresses = std::stoul(value);
-                    } else if (key == "show_educational_info") {
-                        config_.show_educational_info = (value == "true" || value == "1" || value == "yes");
                     } else if (key == "verbose_errors") {
                         config_.verbose_errors = (value == "true" || value == "1" || value == "yes");
                     } else if (key == "context_bytes") {
@@ -163,7 +161,6 @@ void Application::saveConfig(const std::string& config_file)
     file << "max_monitored_addresses=" << config_.max_monitored_addresses << "\n\n";
     
     file << "# Display Settings\n";
-    file << "show_educational_info=" << (config_.show_educational_info ? "true" : "false") << "\n";
     file << "verbose_errors=" << (config_.verbose_errors ? "true" : "false") << "\n";
     file << "context_bytes=" << config_.context_bytes << "\n\n";
     
