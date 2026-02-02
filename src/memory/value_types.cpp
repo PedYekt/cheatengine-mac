@@ -45,41 +45,33 @@ SearchValue SearchValue::fromBytes(const std::vector<std::uint8_t>& bytes)
 
 std::int32_t SearchValue::toInt32() const
 {
-    if (type_ != ValueType::INT32 || data_.size() != sizeof(std::int32_t)) {
-        throw std::runtime_error("SearchValue is not an INT32 type or has invalid size");
-    }
+    if (type_ != ValueType::INT32) throw std::runtime_error("Not INT32");
     std::int32_t value;
-    std::memcpy(&value, data_.data(), sizeof(std::int32_t));
+    std::memcpy(&value, data_.data(), sizeof(value));
     return value;
 }
 
 std::int64_t SearchValue::toInt64() const
 {
-    if (type_ != ValueType::INT64 || data_.size() != sizeof(std::int64_t)) {
-        throw std::runtime_error("SearchValue is not an INT64 type or has invalid size");
-    }
+    if (type_ != ValueType::INT64) throw std::runtime_error("Not INT64");
     std::int64_t value;
-    std::memcpy(&value, data_.data(), sizeof(std::int64_t));
+    std::memcpy(&value, data_.data(), sizeof(value));
     return value;
 }
 
 float SearchValue::toFloat32() const
 {
-    if (type_ != ValueType::FLOAT32 || data_.size() != sizeof(float)) {
-        throw std::runtime_error("SearchValue is not a FLOAT32 type or has invalid size");
-    }
+    if (type_ != ValueType::FLOAT32) throw std::runtime_error("Not FLOAT32");
     float value;
-    std::memcpy(&value, data_.data(), sizeof(float));
+    std::memcpy(&value, data_.data(), sizeof(value));
     return value;
 }
 
 double SearchValue::toFloat64() const
 {
-    if (type_ != ValueType::FLOAT64 || data_.size() != sizeof(double)) {
-        throw std::runtime_error("SearchValue is not a FLOAT64 type or has invalid size");
-    }
+    if (type_ != ValueType::FLOAT64) throw std::runtime_error("Not FLOAT64");
     double value;
-    std::memcpy(&value, data_.data(), sizeof(double));
+    std::memcpy(&value, data_.data(), sizeof(value));
     return value;
 }
 

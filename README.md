@@ -1,11 +1,11 @@
-# CheatEngine - Educational Memory Management Tool for macOS
+# CheatEngine - Memory Analysis Tool for macOS
 
-CheatEngine is an educational C++17 tool designed to demonstrate operating system memory management concepts through process introspection on macOS. It uses Mach kernel APIs to safely explore virtual memory, making it an excellent learning resource for understanding how modern operating systems manage memory.
+CheatEngine is a C++17 tool for macOS process introspection and memory analysis. It uses Mach kernel APIs to explore virtual memory while respecting system security boundaries.
 
 ### Safety Guidelines
 - **Only attach to your own processes** - Never attempt to access processes owned by other users
 - **Respect system boundaries** - Do not attempt to bypass macOS security features
-- **Use for learning** - This tool is meant to understand concepts, not to circumvent application security
+- **Use responsibly** - This tool is meant for legitimate analysis, not to circumvent application security
 - **Test safely** - Always test on sample applications or your own code first
 
 ## Installation and Compilation
@@ -305,7 +305,7 @@ cmake -LA | grep CMAKE_
 **System Integrity Protection Blocks**:
 - SIP prevents access to system processes
 - This is normal and expected behavior
-- Focus on user processes for learning
+- Focus on user processes you own
 
 **Code Signature Invalid**:
 ```bash
@@ -333,50 +333,17 @@ When reporting problems, include:
 - Error messages and logs
 - Steps to reproduce
 
-## Educational Resources
-
-### Recommended Reading
-
-1. **"Mac OS X Internals" by Amit Singh** - Deep dive into macOS architecture
-2. **"The Design and Implementation of the FreeBSD Operating System"** - Unix/BSD concepts
-3. **Apple Developer Documentation** - Mach kernel and virtual memory APIs
-4. **"Computer Systems: A Programmer's Perspective"** - Memory hierarchy and virtual memory
-
-### Online Resources
-
-- [Apple Developer Documentation](https://developer.apple.com/documentation/)
-- [Mach Overview](https://developer.apple.com/library/archive/documentation/Darwin/Conceptual/KernelProgramming/Mach/Mach.html)
-- [Virtual Memory Programming Guide](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/)
-
-### Hands-On Exercises
-
-1. **Memory Layout Exploration**:
-   - Compile programs with different optimization levels
-   - Observe how memory layout changes
-   - Compare stack vs heap allocation patterns
-
-2. **Security Boundary Testing**:
-   - Try attaching to different types of processes
-   - Understand when and why access is denied
-   - Learn about macOS security model
-
-3. **Performance Analysis**:
-   - Measure memory access patterns
-   - Observe cache effects in real programs
-   - Understand memory bandwidth limitations
-
 ## Contributing
 
-CheatEngine is an educational project. Contributions that enhance learning are welcome:
+CheatEngine is an open-source project. Contributions that improve usability, stability, and documentation are welcome:
 
 - **Documentation improvements**
-- **Additional educational examples**
 - **Better error explanations**
 - **Cross-platform compatibility** (Linux, Windows)
 
 ### Development Guidelines
 
-- Maintain educational focus
+- Maintain a security-conscious focus
 - Include comprehensive comments
 - Add safety checks and validations
 - Follow C++17 best practices
